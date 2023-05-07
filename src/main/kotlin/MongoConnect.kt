@@ -40,6 +40,10 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
 
     fun createData(data: List<Pair<String, String>>): Boolean {
         return try {
+            if (data.isEmpty()) {
+                // Return true immediately if data is empty
+                return true
+            }
             val documents = data.map { Document("variable", it.first).append("value", it.second) }
             collection.insertMany(documents)
             true
@@ -78,7 +82,6 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
         try {
             // Close the connection to MongoDB
             mongoClient.close()
-            logger.info("LnNo:${Thread.currentThread().stackTrace[1].lineNumber}-> Successfully closed connection to MongoDB")
         } catch (e: Exception) {
             logger.warning("Error closing connection to MongoDB: $e")
         }

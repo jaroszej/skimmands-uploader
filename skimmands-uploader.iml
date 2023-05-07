@@ -12,7 +12,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="xerial.sqlite.jdbc" level="project" />
     <orderEntry type="library" name="jetbrains.kotlin.stdlib" level="project" />
-    <orderEntry type="library" name="google.code.gson" level="project" />
     <orderEntry type="library" name="mongodb.driver.sync" level="project" />
     <orderEntry type="library" name="mongodb.mongo.java.driver" level="project" />
     <orderEntry type="library" name="ch.qos.logback.db.classic" level="project" />

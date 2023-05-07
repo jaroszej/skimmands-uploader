@@ -1,65 +1,111 @@
 
+import utility.Util
+import utility.ZLog
+import java.io.FileInputStream
+import java.io.IOException
+import java.util.*
 import java.util.logging.Logger
 
 fun main(args: Array<String>) {
-//    val mainGUI = MainGUI("Skimmands Uploader")
-
     val logger = ZLog::class.java.let { Logger.getLogger(it.name) }
 
-    val dbPath = "R:/Documents/skis phantombot/3.6.5.2/PhantomBot-3.6.5.2/config/phantombot.db"
-    // open SQLite
-    val watcher = SQLiteWatcher(dbPath)
+    val prop = Properties()
+    try {
+        val input = FileInputStream("test.properties") // TODO: rename to 'config.properties'
+        prop.load(input)
+        input.close()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+
+    val sqlitePath = try {
+        prop.getProperty("phantombotDB.path")
+    } catch (e: Exception) {
+        logger.warning("Filename 'test.properties' @ property 'phantombotDB.path': $e \nDefaulting to 'phantombot.db'\nThis will target the SQLite database if it is in the same directory as this application.")
+        "phantombot.db"
+    }
+
+    val syncInterval = try {
+        prop.getProperty("syncInterval").toInt()
+    } catch (e: Exception) {
+        logger.warning("Filename 'test.properties' @ property 'syncInterval': Must be an integer. Defaulting to 15 minute sync interval.")
+        15 // default to 15 min interval
+    }
+
+    logger.info(">sqlite path: $sqlitePath")
+    logger.info(">sync interval: $syncInterval")
+
+    // Set up timer to execute the retrieval and insertion at user-set intervals
+    val timer = Timer()
 
     val query = "SELECT variable, value FROM phantombot_command"
-    val localCommands = watcher.readFromTable(query)
-    // close SQLite
-    watcher.closeConnection()
-    val sqlFinish = Thread.currentThread().stackTrace[1].lineNumber
-
-    // Connect to MongoDB Atlas
     val mongoConnStr = "mongodb+srv://jasonj:7toDQJD96ZECE5xd@zsrcluster.uq3lwwn.mongodb.net/?retryWrites=true&w=majority"
-    val mongoConn = MongoConnect(mongoConnStr, "dbName", "collection1")
 
-    val data = mongoConn.getData()
-    mongoConn.closeConnection()
-    logger.info("LnNo:$sqlFinish -> local phantombot commands: $localCommands")
-    logger.info("LnNo:${Thread.currentThread().stackTrace[1].lineNumber} -> mongo data: $data")
+    val intervalMillis: Long = Util.minutesToMS(syncInterval)
+    timer.scheduleAtFixedRate(object : TimerTask() {
+        override fun run() {
+            // open SQLite
+            val sqliteWatcher = SQLiteWatcher(sqlitePath)
 
-    // find key-value pairs present in SQLite but not uploaded to MongoDB
-    val sqlDataKeys = localCommands.map { it.first }
-    val mongoDataKeys = data.map { it.first }
-    val onlyInSQLite = localCommands.filter { it.first !in mongoDataKeys }
-    val result = onlyInSQLite.map { Pair(it.first, it.second) }
-    logger.info("LnNo:${Thread.currentThread().stackTrace[1].lineNumber} -> SQLite data not in mongoDB: $result")
+            val sqliteData = sqliteWatcher.readFromTable(query)
+            // close SQLite
+            sqliteWatcher.closeConnection()
 
-//
-//    // Set up timer to execute the retrieval and insertion at user-set intervals
-//    val timer = Timer()
-//    timer.scheduleAtFixedRate(object : TimerTask() {
-//        override fun run() {
-//            try {
-//                // Retrieve data from SQLite database
-//                val resultSet = sqliteStmt.executeQuery("SELECT * FROM myTable")
-//                val gson = Gson()
-//                val jsonArray = ArrayList<JsonObject>()
-//                while (resultSet.next()) {
-//                    val jsonObject = JsonObject()
-//                    jsonObject.addProperty("id", resultSet.getInt("id"))
-//                    jsonObject.addProperty("name", resultSet.getString("name"))
-//                    jsonArray.add(jsonObject)
-//                }
-//
-//                // Insert data into MongoDB Atlas database
-//                val documents = ArrayList<Document>()
-//                for (jsonObject in jsonArray) {
-//                    val document = Document.parse(gson.toJson(jsonObject))
-//                    documents.add(document)
-//                }
-//                collection.insertMany(documents)
-//            } catch (e: Exception) {
-//                Logger.getLogger("MyApp").warning("Error while executing data retrieval and insertion: ${e.message}")
-//            }
-//        }
-//    }, 0, intervalMillis)
+            // Connect to MongoDB Atlas
+            val mongoConn = MongoConnect(mongoConnStr, "dbName", "collection1")
+
+            val mongoData = mongoConn.getData()
+
+            logger.info(">sqlite data: $sqliteData")
+            logger.info(">mongo data: $mongoData")
+
+            // find key-value pairs present in SQLite but not uploaded to MongoDB
+            val sqlDataKeys = sqliteData.map { it.first }
+//            val sqlDataValues = sqliteData.map { it.second }
+            val mongoDataKeys = mongoData.map { it.first }
+            val mongoDataValues = mongoData.map { it.second }
+
+            // sets
+            // only in SQLite -> create
+            val onlyInSQLite = sqliteData.filter { it.first !in mongoDataKeys }
+            logger.info(">sqlite only: $onlyInSQLite")
+
+            // only in Mongo -> delete
+            val onlyInMongo = mongoData.filter { it.first !in sqlDataKeys }
+            logger.info(">mongo only: $onlyInMongo")
+
+            // in SQLite and Mongo but have different values -> update
+            val matchingKeys = sqliteData.filter { it.first in mongoDataKeys && it.second !in mongoDataValues }
+            logger.info(">shared key different value: $matchingKeys")
+
+
+            // CREATE
+            if (onlyInSQLite.isNotEmpty()) {
+                logger.info(">>adding $onlyInSQLite to mongoDB")
+                mongoConn.createData(onlyInSQLite)
+                logger.info(">>added ${onlyInSQLite.size} commands $onlyInSQLite to mongoDB")
+            }
+
+            // UPDATE
+            if (matchingKeys.isNotEmpty()) {
+                logger.info(">>updating $matchingKeys in mongoDB")
+                mongoConn.updateData(matchingKeys)
+                logger.info(">>updated $matchingKeys in mongoDB")
+            }
+
+            // DELETE
+            if (onlyInMongo.isNotEmpty()) {
+                logger.info(">>removing $onlyInMongo from mongoDB")
+                mongoConn.deleteData(onlyInMongo)
+                logger.info(">>removed $onlyInMongo from mongoDB")
+            }
+
+
+            // close mongo
+            logger.info(">final mongo data: ${mongoConn.getData()}")
+            mongoConn.closeConnection()
+
+        }
+    }, 0, intervalMillis)
 
 }
