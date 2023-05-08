@@ -18,28 +18,109 @@ fun main(args: Array<String>) {
         e.printStackTrace()
     }
 
-    val sqlitePath = try {
-        prop.getProperty("phantombotDB.path")
-    } catch (e: Exception) {
-        logger.warning("Filename 'test.properties' @ property 'phantombotDB.path': $e \nDefaulting to 'phantombot.db'\nThis will target the SQLite database if it is in the same directory as this application.")
-        "phantombot.db"
-    }
-
     val syncInterval = try {
         prop.getProperty("syncInterval").toInt()
     } catch (e: Exception) {
-        logger.warning("Filename 'test.properties' @ property 'syncInterval': Must be an integer. Defaulting to 15 minute sync interval.")
+        logger.warning("Property 'syncInterval': Must be an integer. Defaulting to 15 minute sync interval.")
         15 // default to 15 min interval
     }
 
-    logger.info(">sqlite path: $sqlitePath")
+    val sqlitePath = try {
+        prop.getProperty("phantombotDB.path")
+    } catch (e: Exception) {
+        logger.warning("Property 'phantombotDB.path': $e \nDefaulting to 'phantombot.db'\nThis will target the SQLite database if it is in the same directory as this application.")
+        "phantombot.db"
+    }
+
+//    val mongoConnectMode = try {
+//        prop.getProperty("mongodbRealm.mode")
+//    } catch (e: Exception) {
+//        logger.warning("Property 'mongodbRealm.mode': $e")
+//    }
+
+//    when (mongoConnectMode) {
+//        "anon" -> {
+//            val mongoAuth = mongoConnectMode
+//        }
+//        "email" -> {
+//            val mongoEmail = try {
+//                prop.getProperty("mongodbRealm.auth.u")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.u': $e")
+//            }
+//            val mongoPass = try {
+//                prop.getProperty("mongodbRealm.auth.p")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.p': $e")
+//            }
+//        }
+//        "facebook" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.fb")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.fb': $e")
+//            }
+//        }
+//        "google" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.google")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.google': $e")
+//            }
+//        }
+//        "apple" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.apple")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.apple': $e")
+//            }
+//        }
+//        "apikey" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.pubkey")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.pubkey': $e")
+//            }
+//        }
+//        "jwt" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.jwt")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.jwt': $e")
+//            }
+//        }
+//        "fn" -> {
+//            val mongoAuth = try {
+//                prop.getProperty("mongodbRealm.auth.fn")
+//            } catch (e: Exception) {
+//                logger.warning("Property 'mongodbRealm.auth.fn': $e")
+//            }
+//        }
+//        else -> {
+//            // code for handling an unknown or unsupported value
+//        }
+//    }
+
+    val mongoAuth = try {
+        prop.getProperty("mongodbRealm.auth.pubkey")
+    } catch (e: Exception) {
+        logger.warning("Property 'mongodbRealm.auth.pubkey': $e")
+    }
+
+    val mongoConnStr = try {
+        prop.getProperty("mongodbRealm.connection")
+    } catch (e: Exception) {
+        logger.warning("Property 'mongodbRealm.mode': $e")
+    }
+
     logger.info(">sync interval: $syncInterval")
+    logger.info(">sqlite path: $sqlitePath")
+    logger.info(">mongodb uri: $mongoConnStr")
 
     // Set up timer to execute the retrieval and insertion at user-set intervals
     val timer = Timer()
 
     val query = "SELECT variable, value FROM phantombot_command"
-    val mongoConnStr = "mongodb+srv://jasonj:7toDQJD96ZECE5xd@zsrcluster.uq3lwwn.mongodb.net/?retryWrites=true&w=majority"
 
     val intervalMillis: Long = Util.minutesToMS(syncInterval)
     timer.scheduleAtFixedRate(object : TimerTask() {
@@ -52,7 +133,7 @@ fun main(args: Array<String>) {
             sqliteWatcher.closeConnection()
 
             // Connect to MongoDB Atlas
-            val mongoConn = MongoConnect(mongoConnStr, "dbName", "collection1")
+            val mongoConn = MongoConnect(mongoConnStr.toString(), "dbName", "collection1")
 
             val mongoData = mongoConn.getData()
 
