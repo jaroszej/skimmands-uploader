@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
 
     val prop = Properties()
     try {
-        val input = FileInputStream("test1.properties") // TODO: rename to 'config.properties'
+        val input = FileInputStream("config.properties")
         prop.load(input)
         input.close()
     } catch (e: IOException) {
