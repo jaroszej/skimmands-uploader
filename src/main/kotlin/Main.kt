@@ -65,7 +65,7 @@ fun main(args: Array<String>) {
             val mongoDataKeys = mongoData.map { it.first }
             val mongoDataValues = mongoData.map { it.second }
 
-            // sets
+            // sets /////////
             // only in SQLite -> create
             val onlyInSQLite = sqliteData.filter { it.first !in mongoDataKeys }
             logger.info(">sqlite only: $onlyInSQLite")
