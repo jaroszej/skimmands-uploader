@@ -27,6 +27,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-test.properties
-test*.properties
-test1.properties
+*.properties
