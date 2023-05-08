@@ -8,7 +8,7 @@ import java.util.logging.Logger
 
 fun main(args: Array<String>) {
     val logger = ZLog::class.java.let { Logger.getLogger(it.name) }
-// TODO: fix the auth uri to connect to ski's mongoDB and make the EXE after testing
+
     val prop = Properties()
     try {
         val input = FileInputStream("test1.properties") // TODO: rename to 'config.properties'
