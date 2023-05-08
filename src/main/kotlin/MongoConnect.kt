@@ -1,6 +1,7 @@
 
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
+import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.UpdateOptions
@@ -70,7 +71,7 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
     fun deleteData(data: List<Pair<String, String>>): Boolean {
         return try {
             val variables = data.map { it.first }
-            collection.deleteMany(eq("variable", Document("\$nin", variables)))
+            collection.deleteMany(Filters.`in`("variable", variables))
             true
         } catch (e: Exception) {
             logger.warning("Error deleting data in MongoDB: $e")
