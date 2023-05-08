@@ -1,0 +1,32 @@
+## Skimmand Uploader Configuration File ##
+##########################################
+##########################################
+
+# SYNC
+# time in minutes to check local DB and sync with cloud
+# -defaults-
+# -> 15
+syncInterval=3
+
+# SQLITE
+# Path to SQLite database
+# -defaults-
+# path -> phantombot.db
+# query -> SELECT variable, value FROM table
+phantombotDB.path=/phantombot.db
+phantombotDB.query=SELECT variable, value FROM phantombot_command
+
+# MONGODB REALM
+# connection and auth to mongoDB Realm
+# -defaults-
+# connection -> mongodb+srv://<username>:<password>@<hostname>.net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority
+# mode -> (anon / email / facebook / google / apple / apikey / jwt / fn)
+# auth.u -> username
+# auth.p -> password
+mongodbRealm.connection=
+mongodbRealm.mode=apikey
+# uncomment if using email mode
+# mongodbRealm.auth.u=username
+# mongodbRealm.auth.p=password
+# uncomment if you are using apikey mode
+# mongodbRealm.auth.pubkey=<API Key>
