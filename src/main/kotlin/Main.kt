@@ -1,52 +1,15 @@
 
 import utility.Util
 import utility.ZLog
-import java.io.FileInputStream
-import java.io.IOException
 import java.util.*
 import java.util.logging.Logger
 
 fun main(args: Array<String>) {
     val logger = ZLog::class.java.let { Logger.getLogger(it.name) }
 
-    val prop = Properties()
-    try {
-        val input = FileInputStream("config.properties")
-        prop.load(input)
-        input.close()
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
-
-    // Sync Interval (m)
-    val syncInterval = try {
-        prop.getProperty("syncInterval").toInt()
-    } catch (e: Exception) {
-        logger.warning("Property 'syncInterval': Must be an integer. Defaulting to 15 minute sync interval.")
-        15 // default to 15 min interval
-    }
-
-    // SQLite DB Path
-    val sqlitePath = try {
-        prop.getProperty("phantombotDB.path")
-    } catch (e: Exception) {
-        logger.warning("Property 'phantombotDB.path': $e \nDefaulting to 'phantombot.db'\nThis will target the SQLite database if it is in the same directory as this application.")
-        "phantombot.db"
-    }
-
-//    //
-//    val mongoAuth = try {
-//        prop.getProperty("mongodbRealm.auth.pubkey")
-//    } catch (e: Exception) {
-//        logger.warning("Property 'mongodbRealm.auth.pubkey': $e")
-//    }
-
-    // MongoDB Connection
-    val mongoConnStr = try {
-        prop.getProperty("mongodbRealm.connection")
-    } catch (e: Exception) {
-        logger.warning("Property 'mongodbRealm.mode': $e")
-    }
+    val syncInterval = System.getProperty("syncInterval")?.toInt() ?: 15
+    val sqlitePath = System.getProperty("sqlitePath") ?: "config/phantombot.db"
+    val mongoConnStr = System.getProperty("mongoConnStr") ?: "mongodb://localhost:27017"
 
     logger.info(">sync interval: $syncInterval")
     logger.info(">sqlite path: $sqlitePath")
