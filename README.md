@@ -18,7 +18,9 @@ Path to SQLite database relative to the .exe
 
 ### MONGODB REALM
 connection and auth to mongoDB Realm  
-~*For version 0.1.0 only mongodbRealm.connection should be touched, ignore the rest of the fields*  
+~*For version 0.1.0 only mongodbRealm.connection should be touched, ignore the rest of the fields*    
+  
+
 connection -> mongodb+srv://<username>:<password>@<hostname>.net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority  
 mode -> (anon / email / facebook / google / apple / apikey / jwt / fn)  
 auth.u -> username  
