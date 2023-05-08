@@ -74,9 +74,6 @@ fun main(args: Array<String>) {
 
             val mongoData = mongoConn.getData()
 
-            logger.info(">sqlite data: $sqliteData")
-            logger.info(">mongo data: $mongoData")
-
             // find key-value pairs present in SQLite but not uploaded to MongoDB
             val sqlDataKeys = sqliteData.map { it.first }
 //            val sqlDataValues = sqliteData.map { it.second }
@@ -118,9 +115,7 @@ fun main(args: Array<String>) {
                 logger.info(">>removed $onlyInMongo from mongoDB")
             }
 
-
             // close mongo
-            logger.info(">final mongo data: ${mongoConn.getData()}")
             mongoConn.closeConnection()
 
         }
