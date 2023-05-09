@@ -11,7 +11,7 @@ Config can be adjusted in the batch file `skimmands_uploader_start.bat`
 - -Xmx1g: max heap size 1Gb
 - -DsyncInterval: sync interval in minutes between SQLite and MongoDB Atlas (default: 15)
 - -DsqlitePath: file path to the phantombot SQLite database (default: "config/phantombot.db")
-- DmongoConnStr: connection string for MongoDB Atlas (default: "mongodb+srv://[username]:[password]@[hostname].net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority")
+- -DmongoConnStr: connection string for MongoDB Atlas (default: "mongodb+srv://[username]:[password]@[hostname].net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority")
 
 
 ### Logs
