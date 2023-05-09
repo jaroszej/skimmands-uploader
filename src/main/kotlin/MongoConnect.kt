@@ -4,9 +4,7 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Projections
-import com.mongodb.client.model.UpdateOptions
 import org.bson.Document
-import java.util.logging.Level
 import java.util.logging.Logger
 
 class MongoConnect(uri: String, databaseName: String, collectionName: String) {
@@ -19,7 +17,6 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
         // Get a reference to the specified database and collection
         val database = mongoClient.getDatabase(databaseName)
         collection = database.getCollection(collectionName)
-        logger.level = Level.INFO
     }
 
     fun getCollection(): MongoCollection<Document> {
@@ -46,8 +43,8 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
                 return true
             }
             val documents = data.map { Document("variable", it.first).append("value", it.second) }
-            collection.insertMany(documents)
-            true
+            val result = collection.insertMany(documents)
+            result.wasAcknowledged()
         } catch (e: Exception) {
             logger.warning("Error creating data in MongoDB: $e}")
             false
@@ -59,7 +56,7 @@ class MongoConnect(uri: String, databaseName: String, collectionName: String) {
             data.forEach {
                 val variable = it.first
                 val value = it.second
-                collection.updateOne(eq("variable", variable), Document("\$set", Document("value", value)), UpdateOptions().upsert(true))
+                collection.updateOne(eq("variable", variable), Document("\$set", Document("value", value)))
             }
             true
         } catch (e: Exception) {

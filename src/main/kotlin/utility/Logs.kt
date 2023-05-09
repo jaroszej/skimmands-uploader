@@ -1,5 +1,6 @@
 package utility
 
+import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -16,7 +17,12 @@ class ZLog(className: Class<*>) {
 
         val fileHandler: Handler
         try {
-            fileHandler = FileHandler("skimmands-${sdf.format(Date())}.log", 1024 * 1024, 5, true)
+            val logDirectoryFile = File("skimmands_uploader_logs")
+            if (!logDirectoryFile.exists()) {
+                logDirectoryFile.mkdirs()
+            }
+            val logFilePath = "${logDirectoryFile.absolutePath}/skimmands-${sdf.format(Date())}.log"
+            fileHandler = FileHandler(logFilePath, 1024 * 1024, 5, true)
             fileHandler.formatter = CustomFormatter(className)
             LOGGER.addHandler(fileHandler)
         } catch (e: IOException) {

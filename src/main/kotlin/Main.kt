@@ -60,22 +60,34 @@ fun main(args: Array<String>) {
             // CREATE
             if (onlyInSQLite.isNotEmpty()) {
                 logger.info(">>adding $onlyInSQLite to mongoDB")
-                mongoConn.createData(onlyInSQLite)
-                logger.info(">>added ${onlyInSQLite.size} commands $onlyInSQLite to mongoDB")
+                val createSuccess = mongoConn.createData(onlyInSQLite)
+                if (createSuccess) {
+                    logger.info(">>added ${onlyInSQLite.size} commands $onlyInSQLite to mongoDB")
+                } else {
+                    logger.warning("Error creating data in MongoDB")
+                }
             }
 
             // UPDATE
             if (matchingKeys.isNotEmpty()) {
                 logger.info(">>updating $matchingKeys in mongoDB")
-                mongoConn.updateData(matchingKeys)
-                logger.info(">>updated $matchingKeys in mongoDB")
+                val updateSuccess = mongoConn.updateData(matchingKeys)
+                if (updateSuccess) {
+                    logger.info(">>updated $matchingKeys in mongoDB")
+                } else {
+                    logger.warning("Error updating data in MongoDB")
+                }
             }
 
             // DELETE
             if (onlyInMongo.isNotEmpty()) {
                 logger.info(">>removing $onlyInMongo from mongoDB")
-                mongoConn.deleteData(onlyInMongo)
-                logger.info(">>removed $onlyInMongo from mongoDB")
+                val success = mongoConn.deleteData(onlyInMongo)
+                if (success) {
+                    logger.info(">>removed $onlyInMongo from mongoDB")
+                } else {
+                    logger.warning(">>failed to remove $onlyInMongo from mongoDB")
+                }
             }
 
             // close mongo
