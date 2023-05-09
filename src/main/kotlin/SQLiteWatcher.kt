@@ -1,4 +1,3 @@
-import utility.ZLog
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -6,17 +5,17 @@ import java.util.logging.Logger
 
 class SQLiteWatcher(private val path: String) {
     private var connection: Connection? = null
-    private val zlog = ZLog::class.java.let { Logger.getLogger(it.name) }
+    private val logger: Logger = Logger.getLogger(SQLiteWatcher::class.java.name)
 
     init {
         try {
             Class.forName("org.sqlite.JDBC")
             connection = DriverManager.getConnection("jdbc:sqlite:$path")
         } catch (e: ClassNotFoundException) {
-            zlog.severe("Failed to load SQLite JDBC driver: $e")
+            logger.severe("Failed to load SQLite JDBC driver: $e")
             closeConnection()
         } catch (e: SQLException) {
-            zlog.severe("Failed to establish database connection: $e")
+            logger.severe("Failed to establish database connection: $e")
             closeConnection()
         }
     }
@@ -33,13 +32,13 @@ class SQLiteWatcher(private val path: String) {
             }
             items
         } catch (e: SQLException) {
-            zlog.severe("Error executing SQL query on database at $path: $e")
+            logger.severe("Error executing SQL query on database at $path: $e")
             emptyList()
         } catch (e: ClassNotFoundException) {
-            zlog.severe("Failed to load SQLite JDBC driver: $e")
+            logger.severe("Failed to load SQLite JDBC driver: $e")
             emptyList()
         } catch (e: IllegalStateException) {
-            zlog.severe("Failed to establish database connection at $path: $e")
+            logger.severe("Failed to establish database connection at $path: $e")
             emptyList()
         } finally {
             statement?.close()
@@ -51,7 +50,7 @@ class SQLiteWatcher(private val path: String) {
             try {
                 it.close()
             } catch (e: SQLException) {
-                zlog.severe("Error closing SQLite connection: $e")
+                logger.severe("Error closing SQLite connection: $e")
             }
             connection = null
         }
