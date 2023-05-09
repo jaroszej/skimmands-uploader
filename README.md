@@ -4,25 +4,16 @@
 
 ## Config Settings
 
-### SYNC
-time in minutes to check local DB and sync with cloud  
-value must be an integer
+Config can be adjusted in the batch file `skimmands_uploader_start.bat`
 
-- syncInterval=15
+### Flags
 
-### SQLITE
-Path to SQLite database relative to the .exe  
-.path can be directed to other directories *(eg. C:/Documents/my phantombot/PhantomBot-<version>/config/phantombot.db)*
-- phantombotDB.path=phantombot.db
-- phantombotDB.query=SELECT variable, value FROM phantombot_command
+- -Xmx1g: max heap size 1Gb
+- -DsyncInterval: sync interval in minutes between SQLite and MongoDB Atlas (default: 15)
+- -DsqlitePath: file path to the phantombot SQLite database (default: "config/phantombot.db")
+- DmongoConnStr: connection string for MongoDB Atlas (default: "mongodb+srv://[username]:[password]@[hostname].net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority")
 
-### MONGODB REALM
-connection and auth to mongoDB Realm  
-~*For version 0.1.0 only mongodbRealm.connection should be touched, ignore the rest of the fields*    
 
-- mongodbRealm.connection=mongodb+srv://<username>:<password>@<hostname>.net/&authMechanism=SCRAM-SHA-256&retryWrites=true&w=majority  
-- mongodbRealm.mode=apikey    
-  
-- mongodbRealm.auth.u=username  
-- mongodbRealm.auth.p=password  
-- mongodbRealm.auth.pubkey=<API Key>
+### Logs
+
+A directory, `skimmands_uploader_logs`, will be created at the same location the .jar is run from. Up to 5 of the most recent log files will be stored here.
