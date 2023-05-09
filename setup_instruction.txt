@@ -1,0 +1,18 @@
+1- Copy the following:
+    skimmands-uploader.jar
+    skimmands_uploader_start.bat
+2- Paste into Phantombot root directory (same directory as config/)
+    eg: C:/PhantomBot-X.X.X/
+3- Right click to edit `skimmands_uploader_start.bat`
+    3a- Configure the following as needed:
+        -DsyncInterval
+        -DsqlitePath
+        -DmongoConnStr
+        (See README.md for details)
+    3b- Save and exit
+4- Run `skimmands_uploader_start.bat`
+
+
+NOTES:
+    - Ctrl + C to exit or simply exit the terminal window
+    - Logs are saved in `skimmands_uploader_logs`

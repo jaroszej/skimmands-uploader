@@ -39,9 +39,24 @@ fun main() {
         // Log startup message
         logger.info("Starting the Skimmands Uploader!")
 
-        val syncInterval = System.getProperty("syncInterval")?.toInt() ?: 15
-        val sqlitePath = System.getProperty("sqlitePath") ?: "config/phantombot.db"
-        val mongoConnStr = System.getProperty("mongoConnStr") ?: "mongodb://localhost:27017"
+        val syncInterval = try {
+            System.getProperty("syncInterval")?.toInt()?.takeIf { it > 0 } ?: 15
+        } catch (e: NumberFormatException) {
+            logger.warning("Invalid syncInterval value: ${e.message}. Using default value: 15")
+            15
+        }
+        val sqlitePath: String = try {
+            System.getProperty("sqlitePath") ?: "config/phantombot.db"
+        } catch (e: Exception) {
+            logger.warning("Error getting sqlitePath property: ${e.message}. Using default value: 'config/phantombot.db'")
+            "config/phantombot.db"
+        }
+        val mongoConnStr: String = try {
+            System.getProperty("mongoConnStr") ?: "mongodb://localhost:27017"
+        } catch (e: Exception) {
+            logger.warning("Error getting mongoConnStr property: ${e.message}. Defaulting to local instance on port 27017")
+            "mongodb://localhost:27017"
+        }
 
         logger.info("### CONFIGURATION PARAMETERS: ###")
         logger.info("sync interval: $syncInterval")
